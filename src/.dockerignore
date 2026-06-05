@@ -1,0 +1,9 @@
+# contexto de build = ./src ; não envie binários/cache ao daemon
+__pycache__/
+*.py[oc]
+*.bin
+*.pcap
+*.csv
+recv/
+_recv/
+Dockerfile.*

@@ -1,0 +1,46 @@
+services:
+  server:
+    build:
+      context: src
+      dockerfile: Dockerfile.server
+    image: src-server
+    cap_add:
+      - NET_ADMIN
+    networks:
+      - trabalho-redes
+    environment:
+      MODE: ${MODE:-tcp}
+      CENARIO: ${CENARIO:-A}
+    volumes:
+      - ./capturas:/cap
+    healthcheck:
+      test: ["CMD-SHELL", "ss -lnp | grep -q 25565"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
+      start_period: 5s
+
+  client:
+    build:
+      context: src
+      dockerfile: Dockerfile.client
+    image: src-client
+    networks:
+      - trabalho-redes
+    depends_on:
+      server:
+        condition: service_healthy
+    environment:
+      MODE: ${MODE:-tcp}
+      HOST: server
+      FILE_SIZE_MB: ${FILE_SIZE_MB:-1}
+      REPETICOES: ${REPETICOES:-30}
+      CSV: ${CSV:-/resultados/resultado.csv}
+      LOG: ${LOG:-/logs/resultado.log}
+    volumes:
+      - ./resultados:/resultados
+      - ./logs:/logs
+
+networks:
+  trabalho-redes:
+    driver: bridge

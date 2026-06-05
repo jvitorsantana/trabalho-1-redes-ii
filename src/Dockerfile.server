@@ -1,0 +1,21 @@
+FROM ubuntu:24.04
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends python3 tcpdump iproute2 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY server.py protocolo.py metrica.py transporte_tcp.py transporte_rudp.py ./
+COPY entrypoint-server.sh /usr/local/bin/entrypoint-server.sh
+RUN sed -i 's/\r$//' /usr/local/bin/entrypoint-server.sh \
+    && chmod +x /usr/local/bin/entrypoint-server.sh
+
+ENV MODE=tcp \
+    HOST=0.0.0.0 \
+    PORT=25565 \
+    SAVE_DIR=/app/recv \
+    CENARIO=A
+
+EXPOSE 25565
+
+ENTRYPOINT ["/usr/local/bin/entrypoint-server.sh"]
